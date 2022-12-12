@@ -1,0 +1,74 @@
+name: Build
+
+on:
+  push:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  install_boost_package:
+    runs-on: ${{ matrix.runner }}
+    name: ${{ matrix.name }}
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Install Boost via vcpkg (2022)
+            runner: windows-2022
+            package_name: vcpkg
+            install_command: vcpkg install boost-date-time boost-filesystem boost-program-options boost-regex boost-system
+
+          - name: Install Boost via choco (2022)
+            runner: windows-2022
+            package_name: choco
+            install_command: choco install boost-msvc-14.3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install boost package
+        run: ${{ matrix.install_command }}
+
+      - name: Configure project
+        run: |
+          mkdir build
+          cd build
+          cmake -G "Visual Studio 17 2022" -DMYAWESOMELIB_USE_SOURCE_BOOST=OFF ..
+
+      - name: Build
+        working-directory: build
+        run: cmake --build . --config Release
+
+  install_boost_source:
+    runs-on: ${{ matrix.runner }}
+    name: ${{ matrix.name }}
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Install Boost from source
+            runner: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure project and fetch Boost
+        run: |
+          mkdir build
+          cd build
+          cmake -G "Visual Studio 17 2022" ..
+
+      - name: Build
+        working-directory: build
+        run: cmake --build . --config Release
