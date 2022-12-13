@@ -4,50 +4,27 @@ if (MYAWESOMELIB_USE_SOURCE_BOOST)
     set(OLD_FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET})
     set(FETCHCONTENT_QUIET OFF)
 
+    set(BOOST_VERSION_SOURCE 1.81.0.beta1)
+
     FetchContent_Declare(boost
-        GIT_REPOSITORY https://github.com/boostorg/boost.git
-        GIT_TAG boost-1.80.0
-        GIT_SUBMODULES_RECURSE ON
-        GIT_SUBMODULES tools/cmake
-                       libs/align
-                       libs/assert
-                       libs/atomic
-                       libs/concept_check
-                       libs/config
-                       libs/container_hash
-                       libs/conversion
-                       libs/core
-                       libs/detail
-                       libs/filesystem
-                       libs/function_types
-                       libs/fusion
-                       libs/integer
-                       libs/io
-                       libs/iterator
-                       libs/move
-                       libs/mp11
-                       libs/mpl
-                       libs/optional
-                       libs/predef
-                       libs/preprocessor
-                       libs/smart_ptr
-                       libs/static_assert
-                       libs/system
-                       libs/throw_exception
-                       libs/tuple
-                       libs/type_traits
-                       libs/typeof
-                       libs/utility
-                       libs/variant2
-                       libs/winapi
-        GIT_PROGRESS ON
-        GIT_SHALLOW ON
-        GIT_REMOTE_UPDATE_STRATEGY CHECKOUT
+                         URL      https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION_SOURCE}/boost-${BOOST_VERSION_SOURCE}.zip
+                         URL_HASH SHA256=e0d4abdfc99c7a57d6d35f090ff32197e89ed83bf49cd9ac8e72babb94b8587f
+                         ${FC_PARAMS}
     )
 
     set(BUILD_SHARED_LIBS OFF)
     set(BOOST_RUNTIME_LINK static)
     message(STATUS "Linking Boost statically (lib)")
+
+    set(NEEDED_LIBRARIES
+        filesystem
+    )
+
+    set(BOOST_INCLUDE_LIBRARIES "${NEEDED_LIBRARIES}"
+        CACHE STRING
+        "List of libraries to build (default: all but excluded and incompatible)"
+        FORCE
+    )
 
     FetchContent_MakeAvailable(boost)
 
